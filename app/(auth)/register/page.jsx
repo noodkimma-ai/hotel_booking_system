@@ -3,13 +3,13 @@
 import { Form, Input, Button, Card, Select, message } from "antd";
 import { UserOutlined, MailOutlined, LockOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../Context/AuthContext";
+// import { useAuth } from "../../Context/AuthContext";
 
 const { Option } = Select;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();
+  // const { register } = useAuth();
 
 
 //    const handleRegister = async (values) => {

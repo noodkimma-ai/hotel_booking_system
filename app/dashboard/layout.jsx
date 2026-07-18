@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }) {
         },
         {
           key: "2",
-          label: <Link href="/dashboard/rooms">Rooms</Link>,
+          label: <Link href="/dashboard/addrooms">Manage Room</Link>,
         },
         {
           key: "3",
@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }) {
         },
         {
           key: "2",
-          label: <Link href="/dashboard/rooms">Available Rooms</Link>,
+          label: <Link href="/dashboard/browse-rooms">Available Rooms</Link>,
         },
         {
           key: "3",

@@ -43,7 +43,7 @@ export default function LoginPage() {
 
       const result = await response.json();   //backend bata token and user ko data awxa in the form of json
       if(!response.ok){
-        message.error(result.message || "Login Failde");
+        message.error(result.message || "Login Failed");
         return;
       }
       localStorage.setItem("token", result.token);
