@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import {useState, useEffect} from "react";
 import { Footer } from "antd/es/layout/layout";
 // import { useAuth } from "../context/AuthContext";
+import CartProvider from "../context/cartContext";
 
 const { Header, Sider, Content } = Layout;
 
@@ -70,11 +71,11 @@ export default function DashboardLayout({ children }) {
         },
         {
           key: "2",
-          label: <Link href="/dashboard/browse-rooms">Available Rooms</Link>,
+          label: <Link href="/dashboard/browse-rooms">Availble Rooms</Link>,
         },
         {
           key: "3",
-          label: <Link href="/dashboard/bookings">My Bookings</Link>,
+          label: <Link href="/dashboard/bookings">Reviews Bookings</Link>,
         },
         {
           key: "4",
@@ -154,7 +155,10 @@ export default function DashboardLayout({ children }) {
 
         <Content className="m-6">
           <div className="bg-white rounded-xl shadow p-6 min-h-[80vh]">
-            {children}
+            <CartProvider>
+               {children}
+            </CartProvider>
+           
           </div>
         </Content>
         <Footer className="bg-white border-t text-center py-4">
