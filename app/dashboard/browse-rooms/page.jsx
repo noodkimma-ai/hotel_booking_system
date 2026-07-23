@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getRooms } from "../../../lib/rooms";
-import { Card, Button, Drawer, Modal, message, DatePicker } from "antd";
+import { Card, Button, Drawer, Modal, message, DatePicker, Form, InputNumber } from "antd";
 import { Header } from "antd/es/layout/layout";
 import { useCart } from "../../context/cartContext";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,8 @@ export default function BrowseRoom() {
   const [rooms, setRooms] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   // const [cartItems, setCartItems] = useState([]);
+
+  const {form} = Form.useForm();
   const {
     cartItems,
     handleAddToCart,
@@ -54,15 +56,67 @@ export default function BrowseRoom() {
   //   return total = total+item.price;
   // },0)    //because initially 0 dekhi start garxa
 
+
+
+  const handleProceedToBooking= async()=>{
+    const saveBooking = await axios.post()
+  }
+
+  const handleSearch=(values)=>{
+    console.log(values);
+  }
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold"> Browse Room</h2>
+
         <Button type="primary" onClick={() => setCartOpen(true)}>
           {" "}
           🛒 Cart ({cartItems.length})
         </Button>
       </div>
+
+      <div className="max-w-4xl mx-auto p-6">
+
+            <Form 
+            form={form}
+            layout="vertical"
+            onFinish={handleSearch}
+            className="m-w-4xl">
+                <Form.Item 
+                label="Check-In"
+                name="checkIn"
+                rules={[
+                    {
+                        required:true, message:"Please select a check-In date"
+                    }
+                ]}>
+                 <DatePicker className="w-full"/>
+                </Form.Item>
+
+                <Form.Item 
+                label="Check-Out"
+                name="checkOut"
+                rules={[{
+                  required:true, message:"Please select check-Out date"
+                }]}>
+                  <DatePicker className="w-full"/>
+                </Form.Item>
+                <Form.Item 
+                label="Number of Guests"
+                name="guest"
+                rules={[{
+                  required:true, message:"Enter a number of guest"
+                }]}>
+                  <InputNumber min={1}
+                  className="w-full"/>
+                </Form.Item>
+            <Button type="primary"
+            htmlType="submit"
+            className="w-full">search</Button>
+
+            </Form>
+            </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {rooms.map((room) => (
           <Card
@@ -145,7 +199,7 @@ export default function BrowseRoom() {
               type="primary"
               className="w-full mt-4"
               onClick={() => {
-                router.push("/dashboard/bookings");
+                handleProceedToBooking
               }}
             >
               Proceed to Booking
