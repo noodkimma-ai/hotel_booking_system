@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 // import { Label } from "recharts";
 export default function BrowseRoom() {
-  const [rooms, setRooms] = useState([]);
+  const [availableRooms, setAvailableRooms] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   // const [cartItems, setCartItems] = useState([]);
 
@@ -63,7 +63,10 @@ export default function BrowseRoom() {
   }
 
   const handleSearch=(values)=>{
-    console.log(values);
+    const checkIn = values.checkIn.format("YYYY-MM-DD");
+    const checkOut =values.checkOut.format("YYYY-MM-DD");
+    const guests = values.guest;
+    console.log({checkIn, checkOut, guests});
   }
   return (
     <div className="p-6">
