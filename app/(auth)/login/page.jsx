@@ -47,7 +47,7 @@ export default function LoginPage() {
         return;
       }
       localStorage.setItem("token", result.token);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.setItem("user", JSON.stringify(result.user));   // backend bata ayeko token localstorage ma save garney 
       message.success("Login successfull");
       router.replace("/dashboard");
     } catch (error) {

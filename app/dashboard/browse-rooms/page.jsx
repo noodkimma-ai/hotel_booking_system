@@ -1,8 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getRooms } from "../../../lib/rooms";
-import { Card, Button, Drawer, Modal, message, DatePicker, Form, InputNumber } from "antd";
+import { getAvailableRooms, getRooms } from "../../../lib/rooms";
+import {
+  Card,
+  Button,
+  Drawer,
+  Modal,
+  message,
+  DatePicker,
+  Form,
+  InputNumber,
+} from "antd";
 import { Header } from "antd/es/layout/layout";
 import { useCart } from "../../context/cartContext";
 import { useRouter } from "next/navigation";
@@ -11,9 +20,15 @@ import dayjs from "dayjs";
 export default function BrowseRoom() {
   const [availableRooms, setAvailableRooms] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+
+  // const [hasSearched, setHasSearched] = useState(false);
   // const [cartItems, setCartItems] = useState([]);
 
-  const {form} = Form.useForm();
+  const [searchData, setSearchData] = useState({
+    checkIn:"", checkOut:"", guests:1,         // hami la proceed to booking garda yo datta naharaos state ma rakhnu parxa because backend lai pani pathaonu paro checIn and CheOut ko date 
+  })
+
+  const { form } = Form.useForm();
   const {
     cartItems,
     handleAddToCart,
@@ -23,14 +38,14 @@ export default function BrowseRoom() {
   } = useCart();
   const router = useRouter();
 
-  useEffect(() => {
-    loadRooms();
-  }, []);
-  const loadRooms = async () => {
-    const data = await getRooms();
-    console.log(data);
-    setRooms(data);
-  };
+  // useEffect(() => {
+  //   loadRooms();
+  // }, []);
+  // const loadRooms = async () => {
+  //   const data = await getRooms();
+  //   console.log(data);
+  //   setRooms(data);
+  // };
   // const handleAddToCart = (room) => {
   //   console.log("current room",room);
   //   const existingItems = cartItems.find((item)=>
@@ -56,18 +71,34 @@ export default function BrowseRoom() {
   //   return total = total+item.price;
   // },0)    //because initially 0 dekhi start garxa
 
+  const handleProceedToBooking = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    console.log(user);
+    // const saveBooking = await axios.post();
+    const bookingData = {
+      // customerID : user.id, // user ko id aba backend la token bata nikalxa so yo chhidoina if nanikaleko bhaye chahinthiyo 
+      cartItems,
+      checkIn:searchData.checkIn,  
+      checkOut:searchData.checkOut,  
+        // aba backend lai thahunxa kun cartItem kun date all  hami loi handle ko to proceed garda pani yo checkOUt and checkIn chainxa so state ko memory bata taneko ho yo checkIn and checkout ani backend lai pathaoxum ani backend la check garxa ani arko customer la yo room available xoina bhanera dekhaoxa  
+    }
+  };
 
-
-  const handleProceedToBooking= async()=>{
-    const saveBooking = await axios.post()
-  }
-
-  const handleSearch=(values)=>{
+  const handleSearch = async (values) => {
     const checkIn = values.checkIn.format("YYYY-MM-DD");
-    const checkOut =values.checkOut.format("YYYY-MM-DD");
+    const checkOut = values.checkOut.format("YYYY-MM-DD");
     const guests = values.guest;
-    console.log({checkIn, checkOut, guests});
-  }
+    const availableRooms = await getAvailableRooms(
+      checkIn,
+      checkOut,
+      guests,
+    );
+    setAvailableRooms(availableRooms);
+    // setHasSearched(true);
+    setSearchData({
+      checkIn, checkOut, guests
+    });
+  };
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -80,48 +111,78 @@ export default function BrowseRoom() {
       </div>
 
       <div className="max-w-4xl mx-auto p-6">
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSearch}
+          className="m-w-4xl"
+        >
+          <Form.Item
+            label="Check-In"
+            name="checkIn"
+            rules={[
+              {
+                required: true,
+                message: "Please select a check-In date",
+              },
+            ]}
+          >
+            <DatePicker
+              className="w-full mt-1"
+              placeholder="select check in"
+              // onChange={(date) => {
+              //   updatedCartItems(room.id, "checkIn", Date);
+              // }} //item.id => hamiley update garnu parney room kun ho and item bhaney map ko item ,,yo checkIn date picker ho so CheckIn ,,,DatePicker bata ayeko date
+              disabledDate={(current) =>
+                current && current.isBefore(dayjs().startOf("day"))
+              }
+            />
+          </Form.Item>
+          
 
-            <Form 
-            form={form}
-            layout="vertical"
-            onFinish={handleSearch}
-            className="m-w-4xl">
-                <Form.Item 
-                label="Check-In"
-                name="checkIn"
-                rules={[
-                    {
-                        required:true, message:"Please select a check-In date"
-                    }
-                ]}>
-                 <DatePicker className="w-full"/>
-                </Form.Item>
-
-                <Form.Item 
-                label="Check-Out"
-                name="checkOut"
-                rules={[{
-                  required:true, message:"Please select check-Out date"
-                }]}>
-                  <DatePicker className="w-full"/>
-                </Form.Item>
-                <Form.Item 
-                label="Number of Guests"
-                name="guest"
-                rules={[{
-                  required:true, message:"Enter a number of guest"
-                }]}>
-                  <InputNumber min={1}
-                  className="w-full"/>
-                </Form.Item>
-            <Button type="primary"
-            htmlType="submit"
-            className="w-full">search</Button>
-
-            </Form>
-            </div>
+          <Form.Item  shouldUpdate={(prev, curr)=>prev.checkIn != curr.checkIn} noStyle>
+            {({getFieldValue})=>(
+          <Form.Item
+            label="Check-Out"
+            name="checkOut"
+            rules={[
+              {
+                required: true,
+                message: "Please select check-Out date",
+              },
+            ]}
+          >
+            <DatePicker className="w-full"
+            disabledDate={(current)=>{
+              const checkIn = getFieldValue("checkIn");
+              if(!checkIn){
+                return current && current < dayjs().startOf("day");
+              }
+              return current && current <= checkIn.startOf("day");
+            }} />
+          </Form.Item>
+           )}
+          </Form.Item>
+          <Form.Item
+            label="Number of Guests"
+            name="guest"
+            rules={[
+              {
+                required: true,
+                message: "Enter a number of guest",
+              },
+            ]}
+          >
+            <InputNumber min={1} className="w-full" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" className="w-full">
+            search
+          </Button>
+        </Form>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {rooms.map((room) => (
+        {availableRooms && availableRooms.length >0 ?(
+        availableRooms.map((room) => (
           <Card
             key={room.id}
             hoverable
@@ -148,7 +209,10 @@ export default function BrowseRoom() {
               Add to cart
             </Button>
           </Card>
-        ))}
+        ))
+        ) :(
+          <p>please search to see available room</p>
+        )}
       </div>
       <Drawer
         title="My Cart"
@@ -163,7 +227,7 @@ export default function BrowseRoom() {
                 <h3 className="font-bold">{item.roomName}</h3>
                 <p>Room No: {item.roomNumber}</p>
                 <p>Room Type: {item.roomType}</p>
-                <div className="mt-3">
+                {/* <div className="mt-3">
                   <label className="font-medium">check In:</label>
                   <DatePicker
                     className="w-full mt-1"
@@ -187,7 +251,8 @@ export default function BrowseRoom() {
                       console.log(date);
                     }}
                   />
-                </div>
+                </div> */}
+                
                 <p>Capacity: {item.capacity}</p>
                 <p>NPR {item.price}</p>
                 <Button type="primary" onClick={() => handleRemove(item.id)}>
@@ -201,9 +266,9 @@ export default function BrowseRoom() {
             <Button
               type="primary"
               className="w-full mt-4"
-              onClick={() => {
+              onClick={
                 handleProceedToBooking
-              }}
+              }
             >
               Proceed to Booking
             </Button>
