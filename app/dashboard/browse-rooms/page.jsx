@@ -16,6 +16,7 @@ import { Header } from "antd/es/layout/layout";
 import { useCart } from "../../context/cartContext";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
+import { createBooking } from "../../../lib/bookings";
 // import { Label } from "recharts";
 export default function BrowseRoom() {
   const [availableRooms, setAvailableRooms] = useState([]);
@@ -35,6 +36,7 @@ export default function BrowseRoom() {
     handleRemove,
     totalValue,
     updatedCartItems,
+    clearCart,
   } = useCart();
   const router = useRouter();
 
@@ -72,9 +74,10 @@ export default function BrowseRoom() {
   // },0)    //because initially 0 dekhi start garxa
 
   const handleProceedToBooking = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    console.log(user);
+    // const user = JSON.parse(localStorage.getItem("user"));   // yo token local storage bata nalida ni hunxa because backend la token bata generate garxa userId 
+    // console.log(user);
     // const saveBooking = await axios.post();
+    try{
     const bookingData = {
       // customerID : user.id, // user ko id aba backend la token bata nikalxa so yo chhidoina if nanikaleko bhaye chahinthiyo 
       cartItems,
@@ -82,12 +85,29 @@ export default function BrowseRoom() {
       checkOut:searchData.checkOut,  
         // aba backend lai thahunxa kun cartItem kun date all  hami loi handle ko to proceed garda pani yo checkOUt and checkIn chainxa so state ko memory bata taneko ho yo checkIn and checkout ani backend lai pathaoxum ani backend la check garxa ani arko customer la yo room available xoina bhanera dekhaoxa  
     }
+    console.log("sending Booking: ", bookingData);
+
+    const response = await createBooking(bookingData);
+    console.log("Response Received: ",response);
+    message.success( response.data.message );
+
+    clearCart();
+
+    router.push("/dashboard/bookings");
+  }catch(error){
+    console.log(error);
+    message.error(error.response?.data?.message || "Booking Failed");
+  }
+   
   };
 
   const handleSearch = async (values) => {
     const checkIn = values.checkIn.format("YYYY-MM-DD");
     const checkOut = values.checkOut.format("YYYY-MM-DD");
     const guests = values.guest;
+
+    console.log("SEARCH DATE: ", checkIn);
+    console.log("SEARCH OUT: ", checkOut)
     const availableRooms = await getAvailableRooms(
       checkIn,
       checkOut,
@@ -96,6 +116,10 @@ export default function BrowseRoom() {
     setAvailableRooms(availableRooms);
     // setHasSearched(true);
     setSearchData({
+      checkIn, checkOut, guests
+    });
+
+    console.log("Search DATA Saving: ", {
       checkIn, checkOut, guests
     });
   };

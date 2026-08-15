@@ -56,9 +56,7 @@ const CartProvider = ({ children }) => {
     return (total = total + item.price);
   }, 0);
 
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  
 
   const updateCartItems = (id, field, value) => {
     //id => kun room update garney, field =>kun field update garney check in or check out, value=> kun date rakhaney
@@ -77,6 +75,10 @@ const CartProvider = ({ children }) => {
     });
     setCartItems(updatedCart);  //react la bhano yo naya array nai aba state ho react rerender gaxa ui update hunxa ra checkin ma date awxa 
   };
+
+  const clearCart = ()=>{   ///this function is call when user click proceed to booking then booking should be successfull then cart willhave to make empty
+    setCartItems([]);
+  }
   return (
     <CartContext.Provider
       value={{
