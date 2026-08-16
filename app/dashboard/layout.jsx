@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }) {
         },
         {
           key: "3",
-          label: <Link href="/dashboard/bookings">Bookings</Link>,
+          label: <Link href="/dashboard/adminBookings">Admin Bookings</Link>,
         },
         {
           key: "4",
