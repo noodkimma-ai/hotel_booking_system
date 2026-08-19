@@ -1,11 +1,43 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getAllBookings } from "../../../lib/bookings";
-import {Table, Tag} from "antd";
+import { getAllBookings , updateBookingStatus} from "../../../lib/bookings";
+import {message, Popconfirm, Table, Tag} from "antd";
+
 
 export default function AdminBooking(){
 
     const [bookings, setBookings] = useState([]);
+
+    
+    const handleStatusChange = async(id, status)=>{
+        const data = await updateBookingStatus(id, status);
+        if(data){
+            setBookings((prevBookings)=>
+
+          prevBookings.map((booking)=>
+        booking.id === id ? {...booking, status:status} : booking) 
+         );
+
+         if( status === "confirmed"){
+            message.success("Booking accepted successfully");
+         }else if(status === "cancelled"){
+            message.success("Booking Rejected success fully");
+         }
+        }
+    };
+
+    useEffect(()=>{
+
+        console.log("Use Effect RUnning");
+        const loadBookings = async()=>{
+            console.log("Load booking function Run");
+            const data = await getAllBookings();
+            console.log("Admin Booking Data", data);
+            setBookings(data?.bookings || []);
+        };;
+        loadBookings();
+
+    },[])
 
     const columns = [
         {
@@ -65,21 +97,37 @@ export default function AdminBooking(){
                 );
             },
         },
+        {
+            title:"Action",
+            render:(_,booking)=>{
+                if(booking.status !== "pending"){
+                    return (<Tag color={booking.status  === "confirmed" ? "green" : "red"}>
+                        {String(booking.status).toUpperCase()}
+                    </Tag>
+                    );
+                }
+                return(
+                    <div style={{display:"flex", gap:"8px"}}>
+                        <button onClick={()=>handleStatusChange(booking.id, "confirmed")}>Accept</button>
+
+                        <Popconfirm
+                        title="Reject this booking?"
+                        description="Are you sure you want to reject this booking?"
+                        okText="Yes"
+                        cancelText="No"
+                        onConfirm={()=>{
+                            updateBookingStatus(booking.id, "cancelled")
+                        }}>
+                        <button danger>Reject</button>
+
+                        </Popconfirm>
+                    </div>
+                );
+            },
+        },
     
     ]
 
-    useEffect(()=>{
-
-        console.log("Use Effect RUnning");
-        const loadBookings = async()=>{
-            console.log("Load booking function Run");
-            const data = await getAllBookings();
-            console.log("Admin Booking Data", data);
-            setBookings(data?.bookings || []);
-        };;
-        loadBookings();
-
-    },[])
     return(
         <div>
             <h1>All Booking</h1>
